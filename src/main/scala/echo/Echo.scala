@@ -43,29 +43,32 @@ object Echo extends App {
     `type` match {
       case "init" =>
         nodeId = body.downField("node_id").as[String].getOrElse("")
-        EchoMessage(
-          nodeId,
-          src,
-          EchoMessageBody(
-            "init_ok",
-            Some(sourceMessageId),
-            messageId,
-            None
-          )
-        )
-
+        echoMessage(src, sourceMessageId, "init_ok", None)
       case "echo" =>
-        EchoMessage(
-          nodeId,
+        echoMessage(
           src,
-          EchoMessageBody(
-            "echo_ok",
-            Some(sourceMessageId),
-            messageId,
-            Some(body.downField("echo").as[String].getOrElse(""))
-          )
+          sourceMessageId,
+          "echo_ok",
+          Some(body.downField("echo").as[String].getOrElse(""))
         )
     }
+
+  private def echoMessage(
+      src: String,
+      sourceMessageId: Int,
+      `type`: String,
+      echoMessage: Option[String]
+    ) =
+    EchoMessage(
+      nodeId,
+      src,
+      EchoMessageBody(
+        `type`,
+        Some(sourceMessageId),
+        messageId,
+        echoMessage
+      )
+    )
 
   private def respond(outputMessage: String): Unit = {
     System.err.println(s"Responding with $outputMessage")
