@@ -4,7 +4,7 @@ import io.circe
 import io.circe.Json
 
 class Node {
-  var nodeId: String = ???
+  var nodeId: String = null
   var msgId: Int = 0
 
   def initialize(

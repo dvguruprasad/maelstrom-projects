@@ -24,4 +24,24 @@ package object broadcast {
       in_reply_to: Int,
       msg_id: Int
     )
+  @JsonCodec case class TopologyMessage(
+      src: String,
+      dest: String,
+      body: TopologyBody
+    )
+  @JsonCodec case class TopologyBody(
+      `type`: String,
+      topology: Map[String, List[String]],
+      msg_id: Int
+    )
+  @JsonCodec case class TopologyResponseMessage(
+      src: String,
+      dest: String,
+      body: TopologyResponseBody
+    )
+  @JsonCodec case class TopologyResponseBody(
+      `type`: String,
+      in_reply_to: Int,
+      msg_id: Int
+    )
 }
