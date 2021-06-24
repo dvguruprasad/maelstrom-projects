@@ -3,7 +3,7 @@ package org.maelstromprojects.echo
 import org.maelstromprojects.echo.messages._
 import io.circe.parser.parse
 import io.circe.syntax.EncoderOps
-import io.circe.{ACursor, Json}
+import io.circe.{ ACursor, Json }
 
 import scala.io.StdIn.readLine
 
@@ -12,11 +12,11 @@ object Echo {
   var messageId = 10
   var nodeId = ""
 
-  def run(): Unit = {
+  def run(): Unit =
     while ({
       str = readLine()
       str != null
-    }){
+    }) {
       System.err.println(s"Received $str")
       processMessage(parse(str).getOrElse(Json.Null)) match {
         case Right(response) => respond(response.asJson.noSpaces)
@@ -25,7 +25,6 @@ object Echo {
       }
       messageId += 1
     }
-  }
 
   private def processMessage(message: Json) = {
     val body = message.hcursor.downField("body")
