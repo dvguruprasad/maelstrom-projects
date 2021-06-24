@@ -1,4 +1,4 @@
-package echo
+package org.maelstromprojects.echo
 
 import io.circe.generic.JsonCodec
 

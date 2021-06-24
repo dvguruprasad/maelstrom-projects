@@ -1,20 +1,27 @@
-name := "maelstrom-projects"
+import sbt.Keys.libraryDependencies
 
-version := "0.1"
+ThisBuild / organization := "org.maelstromprojects"
 
-scalaVersion := "2.13.6"
+ThisBuild /version := "0.1.0"
+
+ThisBuild / scalaVersion := "2.13.6"
 
 ThisBuild / scalacOptions ++= Seq("-Ymacro-annotations")
 
 val circeVersion = "0.14.1"
 
-
-libraryDependencies ++= Seq(
+val circe = Seq(
   "io.circe" %% "circe-core",
   "io.circe" %% "circe-generic",
   "io.circe" %% "circe-parser",
   "io.circe" %% "circe-literal"
 ).map(_ % circeVersion)
+val scalactic = "org.scalactic" %% "scalactic" % "3.2.9"
+val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % Test
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.9"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+lazy val maelstromProject = (project in file("."))
+  .settings(
+    name := "maelstrom-projects",
+    libraryDependencies ++= (circe ++ Seq(scalactic, scalatest))
+  )
+

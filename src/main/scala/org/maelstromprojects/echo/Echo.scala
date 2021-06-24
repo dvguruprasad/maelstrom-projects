@@ -1,26 +1,30 @@
-package echo
+package org.maelstromprojects.echo
 
-import echo.messages._
+import org.maelstromprojects.echo.messages._
 import io.circe.parser.parse
 import io.circe.syntax.EncoderOps
 import io.circe.{ACursor, Json}
 
 import scala.io.StdIn.readLine
 
-object Echo extends App {
-  var str = readLine()
+object Echo {
+  var str: String = _
   var messageId = 10
   var nodeId = ""
 
-  while (str != null) {
-    System.err.println(s"Received $str")
-    processMessage(parse(str).getOrElse(Json.Null)) match {
-      case Right(response) => respond(response.asJson.noSpaces)
-      case Left(error) =>
-        System.err.println(s"Could not process message: $error")
+  def run(): Unit = {
+    while ({
+      str = readLine()
+      str != null
+    }){
+      System.err.println(s"Received $str")
+      processMessage(parse(str).getOrElse(Json.Null)) match {
+        case Right(response) => respond(response.asJson.noSpaces)
+        case Left(error) =>
+          System.err.println(s"Could not process message: $error")
+      }
+      messageId += 1
     }
-    messageId += 1
-    str = readLine()
   }
 
   private def processMessage(message: Json) = {
