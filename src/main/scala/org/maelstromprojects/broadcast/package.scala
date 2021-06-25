@@ -44,4 +44,44 @@ package object broadcast {
       in_reply_to: Int,
       msg_id: Int
     )
+  @JsonCodec case class BroadcastMessage(
+      src: String,
+      dest: String,
+      body: BroadcastBody
+    )
+  @JsonCodec case class BroadcastBody(
+      `type`: String,
+      message: Int,
+      msg_id: Int
+    )
+  @JsonCodec case class BroadcastResponseMessage(
+      src: String,
+      dest: String,
+      body: BroadcastResponseBody
+    )
+  @JsonCodec case class BroadcastResponseBody(
+      `type`: String,
+      in_reply_to: Int,
+      msg_id: Int
+    )
+  @JsonCodec case class ReadMessage(
+      src: String,
+      dest: String,
+      body: ReadBody
+    )
+  @JsonCodec case class ReadBody(
+      `type`: String,
+      msg_id: Int
+    )
+  @JsonCodec case class ReadResponseMessage(
+      src: String,
+      dest: String,
+      body: ReadResponseBody
+    )
+  @JsonCodec case class ReadResponseBody(
+      `type`: String,
+      messages: Seq[Int],
+      in_reply_to: Int,
+      msg_id: Int
+    )
 }

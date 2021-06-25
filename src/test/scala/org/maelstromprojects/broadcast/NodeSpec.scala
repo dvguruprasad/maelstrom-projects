@@ -5,7 +5,7 @@ import org.scalatest.matchers._
 
 class NodeSpec extends AnyFlatSpec with should.Matchers {
 
-  "Broadcast" should "handle init and then topology from client c2" in {
+  "Node" should "handle init and then topology from client c2" in {
     val node = new Node()
     val response: InitResponseMessage = node.initialize(
       InitMessage(

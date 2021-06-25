@@ -31,8 +31,22 @@ object Broadcast {
           case Left(error) =>
             System.err.println(s"Could not process topology request: $error")
         }
+      case Right(messageType) if messageType == "broadcast" =>
+        decode[BroadcastMessage](inputString) match {
+          case Right(message) =>
+            respond(node.broadcast(message).asJson.noSpaces)
+          case Left(error) =>
+            System.err.println(s"Could not process broadcast request: $error")
+        }
+      case Right(messageType) if messageType == "read" =>
+        decode[ReadMessage](inputString) match {
+          case Right(message) =>
+            respond(node.read(message).asJson.noSpaces)
+          case Left(error) =>
+            System.err.println(s"Could not process read request: $error")
+        }
       case Right(messageType) =>
-        System.err.println(s"Cannot handle message type $messageType yet!")
+        System.err.println(s"Unknown message type $messageType")
       case Left(error) =>
         System.err.println(s"Could not parse input message: $error")
     }
