@@ -7,35 +7,9 @@ import io.circe.syntax._
 import scala.io.StdIn.readLine
 
 object Broadcast {
-  var nodeId = ""
-
-  var neighbors: Seq[String] = Seq()
+  private val node = new Node()
 
   var inputString: String = _
-  var messageId: Int = 9
-
-  def nextMessageId: Int = {
-    messageId += 1
-    messageId
-  }
-  def processInit(message: InitMessage): InitResponseMessage = {
-    this.nodeId = message.body.node_id
-    InitResponseMessage(
-      message.dest,
-      message.src,
-      InitResponseMessageBody("init_ok", message.body.msg_id, nextMessageId)
-    )
-  }
-
-  def processTopology(message: TopologyMessage): TopologyResponseMessage = {
-    this.neighbors = message.body.topology(nodeId)
-    System.err.println(s"[$nodeId] My neighbors are: $neighbors")
-    TopologyResponseMessage(
-      message.dest,
-      message.src,
-      TopologyResponseBody("topology_ok", message.body.msg_id, nextMessageId)
-    )
-  }
 
   def processMessage(input: Json, inputString: String): Unit =
     input
@@ -46,18 +20,14 @@ object Broadcast {
       case Right(messageType) if messageType == "init" =>
         decode[InitMessage](inputString) match {
           case Right(message) =>
-            val response = processInit(message).asJson.noSpaces
-            System.err.println(s"Responding with $response")
-            System.out.println(response)
+            respond(node.initialize(message).asJson.noSpaces)
           case Left(error) =>
             System.err.println(s"Could not process init request: $error")
         }
       case Right(messageType) if messageType == "topology" =>
         decode[TopologyMessage](inputString) match {
           case Right(message) =>
-            val response = processTopology(message).asJson.noSpaces
-            System.err.println(s"Responding with $response")
-            System.out.println(response)
+            respond(node.topology(message).asJson.noSpaces)
           case Left(error) =>
             System.err.println(s"Could not process topology request: $error")
         }
@@ -66,6 +36,11 @@ object Broadcast {
       case Left(error) =>
         System.err.println(s"Could not parse input message: $error")
     }
+
+  private def respond(response: String): Unit = {
+    System.err.println(s"Responding with $response")
+    System.out.println(response)
+  }
 
   def run(): Unit =
     while ({ inputString = readLine(); inputString != null }) {
