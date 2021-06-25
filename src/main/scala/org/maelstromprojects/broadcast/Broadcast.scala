@@ -7,6 +7,10 @@ import io.circe.syntax._
 import scala.io.StdIn.readLine
 
 object Broadcast {
+  var nodeId = ""
+
+  var neighbors: Seq[String] = Seq()
+
   var inputString: String = _
   var messageId: Int = 9
 
@@ -14,15 +18,23 @@ object Broadcast {
     messageId += 1
     messageId
   }
-  def processInit(message: InitMessage): InitResponseMessage =
+  def processInit(message: InitMessage): InitResponseMessage = {
+    this.nodeId = message.body.node_id
     InitResponseMessage(
       message.dest,
       message.src,
       InitResponseMessageBody("init_ok", message.body.msg_id, nextMessageId)
     )
+  }
 
   def processTopology(message: TopologyMessage): TopologyResponseMessage = {
-    TopologyResponseMessage(message.dest, message.src, TopologyResponseBody("topology_ok", message.body.msg_id, nextMessageId))
+    this.neighbors = message.body.topology(nodeId)
+    System.err.println(s"[$nodeId] My neighbors are: $neighbors")
+    TopologyResponseMessage(
+      message.dest,
+      message.src,
+      TopologyResponseBody("topology_ok", message.body.msg_id, nextMessageId)
+    )
   }
 
   def processMessage(input: Json, inputString: String): Unit =
