@@ -1,6 +1,7 @@
 package org.maelstromprojects.broadcast
 
-import io.circe.Json
+import io.circe.generic.semiauto.deriveEncoder
+import io.circe.{Encoder, Json}
 import io.circe.parser._
 import io.circe.syntax._
 
