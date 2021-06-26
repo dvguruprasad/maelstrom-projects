@@ -1,16 +1,19 @@
 package org.maelstromprojects.broadcast
 
-import io.circe.generic.semiauto.deriveEncoder
-import io.circe.{Encoder, Json}
 import io.circe.parser._
 import io.circe.syntax._
+import io.circe.{Decoder, Encoder, Json}
 
 import scala.io.StdIn.readLine
+
+trait ProcessMessage[T, U] {
+  def process(obj: T): U
+}
 
 object Broadcast {
   private val node = new Node()
 
-  var inputString: String = _
+  private var inputString: String = _
 
   def processMessage(input: Json, inputString: String): Unit =
     input
@@ -19,37 +22,55 @@ object Broadcast {
       .downField("type")
       .as[String] match {
       case Right(messageType) if messageType == "init" =>
-        decode[InitMessage](inputString) match {
-          case Right(message) =>
-            respond(node.initialize(message).asJson.noSpaces)
-          case Left(error) =>
-            System.err.println(s"Could not process init request: $error")
-        }
+        processMessage[InitMessage, InitResponseMessage](inputString)
       case Right(messageType) if messageType == "topology" =>
-        decode[TopologyMessage](inputString) match {
-          case Right(message) =>
-            respond(node.topology(message).asJson.noSpaces)
-          case Left(error) =>
-            System.err.println(s"Could not process topology request: $error")
-        }
+        processMessage[TopologyMessage, TopologyResponseMessage](inputString)
       case Right(messageType) if messageType == "broadcast" =>
-        decode[BroadcastMessage](inputString) match {
-          case Right(message) =>
-            respond(node.broadcast(message).asJson.noSpaces)
-          case Left(error) =>
-            System.err.println(s"Could not process broadcast request: $error")
-        }
+        processMessage[BroadcastMessage, BroadcastResponseMessage](inputString)
       case Right(messageType) if messageType == "read" =>
-        decode[ReadMessage](inputString) match {
-          case Right(message) =>
-            respond(node.read(message).asJson.noSpaces)
-          case Left(error) =>
-            System.err.println(s"Could not process read request: $error")
-        }
+        processMessage[ReadMessage, ReadResponseMessage](inputString)
       case Right(messageType) =>
         System.err.println(s"Unknown message type $messageType")
       case Left(error) =>
         System.err.println(s"Could not parse input message: $error")
+    }
+
+  private def processMessage[T, U](
+      inputString: String
+    )(implicit
+      decoder: Decoder[T],
+      encoder: Encoder[U],
+      monoid: ProcessMessage[T, U]
+    ): Unit =
+    decode[T](inputString) match {
+      case Right(message) =>
+        respond(monoid.process(message).asJson.noSpaces)
+      case Left(error) =>
+        System.err.println(s"Could not process request: $error")
+    }
+
+  implicit private val initMessageMonoid
+      : ProcessMessage[InitMessage, InitResponseMessage] =
+    (obj: InitMessage) => {
+      node.initialize(obj)
+    }
+
+  implicit private val topologyMessageMonoid
+      : ProcessMessage[TopologyMessage, TopologyResponseMessage] =
+    (obj: TopologyMessage) => {
+      node.topology(obj)
+    }
+
+  implicit private val broadcastMessageMonoid
+      : ProcessMessage[BroadcastMessage, BroadcastResponseMessage] =
+    (obj: BroadcastMessage) => {
+      node.broadcast(obj)
+    }
+
+  implicit private val readMessageMonoid
+      : ProcessMessage[ReadMessage, ReadResponseMessage] =
+    (obj: ReadMessage) => {
+      node.read(obj)
     }
 
   private def respond(response: String): Unit = {

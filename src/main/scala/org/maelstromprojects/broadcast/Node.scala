@@ -8,7 +8,8 @@ class Node() {
   var messageId: Int = 9
 
   def initialize(message: InitMessage): InitResponseMessage = {
-    this.nodeIdOpt = Option[String](message.body.node_id).map(_.trim).filterNot(_.isEmpty)
+    this.nodeIdOpt =
+      Option[String](message.body.node_id).map(_.trim).filterNot(_.isEmpty)
     this.nodeIdOpt match {
       case Some(nodeId) =>
         InitResponseMessage(
